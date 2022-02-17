@@ -30,12 +30,12 @@ use Illuminate\Support\Str;
  * Class Wallet.
  *
  * @property string                          $holder_type
- * @property int|string                      $holder_id
+ * @property int                      $holder_id
  * @property string                          $name
  * @property string                          $slug
  * @property string                          $uuid
  * @property string                          $description
- * @property null|array                      $meta
+ * @property null                      $meta
  * @property int                             $decimal_places
  * @property \Bavix\Wallet\Interfaces\Wallet $holder
  * @property string                          $credit
