@@ -47,6 +47,7 @@ class Wallet extends Model implements Customer, WalletFloat, Confirmable, Exchan
     use CanExchange;
     use CanPayFloat;
     use HasGift;
+    use \Spiritix\LadaCache\Database\LadaCacheTrait;
 
     /**
      * @var string[]
