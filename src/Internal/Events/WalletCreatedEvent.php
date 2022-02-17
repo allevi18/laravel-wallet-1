@@ -9,14 +9,14 @@ use DateTimeImmutable;
 final class WalletCreatedEvent implements WalletCreatedEventInterface
 {
     private string $holderType;
-    private int|string $holderId;
+    private int $holderId;
     private string $walletUuid;
     private int $walletId;
     private DateTimeImmutable $createdAt;
 
     public function __construct(
         string $holderType,
-        int|string $holderId,
+        int $holderId,
         string $walletUuid,
         int $walletId,
         DateTimeImmutable $createdAt
@@ -33,7 +33,7 @@ final class WalletCreatedEvent implements WalletCreatedEventInterface
         return $this->holderType;
     }
 
-    public function getHolderId(): int|string
+    public function getHolderId(): int
     {
         return $this->holderId;
     }
