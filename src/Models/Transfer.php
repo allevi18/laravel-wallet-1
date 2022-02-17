@@ -27,6 +27,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class Transfer extends Model
 {
+    use \Spiritix\LadaCache\Database\LadaCacheTrait;
+    
     public const STATUS_EXCHANGE = 'exchange';
     public const STATUS_TRANSFER = 'transfer';
     public const STATUS_PAID = 'paid';
