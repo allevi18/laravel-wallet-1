@@ -116,7 +116,7 @@ class Transaction extends Model
             ->decimal_places;
         $decimalPlaces = $math->powTen($decimalPlacesValue);
 
-        return $math->div($this->amount, $decimalPlaces);
+        return $math->div($this->amount, $decimalPlaces, $decimalPlacesValue);
     }
 
     /**
