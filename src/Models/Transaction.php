@@ -12,6 +12,9 @@ use function config;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Kyslik\ColumnSortable\Sortable;
+use Nicolaslopezj\Searchable\SearchableTrait;
+use \RexlManu\LaravelTickets\Traits\HasTicketReference;
 
 /**
  * Class Transaction.
@@ -31,6 +34,11 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class Transaction extends Model
 {
+    use Sortable;
+    use SearchableTrait;
+    use HasTicketReference;
+    use \Spiritix\LadaCache\Database\LadaCacheTrait;
+
     public const TYPE_DEPOSIT = 'deposit';
     public const TYPE_WITHDRAW = 'withdraw';
 
@@ -55,6 +63,25 @@ class Transaction extends Model
         'wallet_id' => 'int',
         'confirmed' => 'bool',
         'meta' => 'json',
+    ];
+
+    public $sortable = [
+        'id',
+        'type',
+        'amount',
+        'created_at'
+    ];
+
+    protected $searchable = [
+        'columns' => [
+            'transactions.uuid' => 10,
+            'users.email' => 10,
+            'users.username' => 10,
+        ],
+        'joins' => [
+            'users' => ['transactions.payable_id','users.id'],
+            //'sellers' => ['listings.user_id','listings.id'],
+        ],
     ];
 
     public function getTable(): string
@@ -104,5 +131,36 @@ class Transaction extends Model
         $decimalPlaces = $math->powTen($decimalPlacesValue);
 
         $this->amount = $math->round($math->mul($amount, $decimalPlaces));
+    }
+
+    public function sourceSortable($query, $direction)
+    {
+//        return $query->orderBy('meta->source', $direction);
+        return $query
+            ->orderByRaw("FIELD(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.source')) ,'purchase', 'cancel', 'granted', 'order', 'penalty', 'transfer', 'payout') $direction")
+            ->orderBy('id', $direction);
+    }
+
+    public function orderidSortable($query, $direction)
+    {
+        return $query->orderByRaw("CAST(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.order_id')) AS DECIMAL) $direction");
+    }
+
+    public function payoutidSortable($query, $direction)
+    {
+        return $query->orderByRaw("CAST(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.payout_id')) AS DECIMAL) $direction");
+    }
+
+    function hasReferenceAccess() : bool {
+        return (request()->user()->id == $this->payable_id);
+    }
+
+    public function scopeReferenceAccess($query, $user)
+    {
+
+        if ($user->can(config('laravel-tickets.permissions.all-ticket')))
+            return $query;
+
+        return $query->where('payable_id', $user->id);
     }
 }
