@@ -72,14 +72,16 @@ class Transaction extends Model
         'created_at'
     ];
 
-    protected $searchable = [
+     protected $searchable = [
         'columns' => [
             'transactions.uuid' => 10,
             'users.email' => 10,
             'users.username' => 10,
+            'orders.uuid' => 10,
         ],
         'joins' => [
             'users' => ['transactions.payable_id','users.id'],
+            'orders' => ['transactions.meta->order_id', 'orders.id']
             //'sellers' => ['listings.user_id','listings.id'],
         ],
     ];
