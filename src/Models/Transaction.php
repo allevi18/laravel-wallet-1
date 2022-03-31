@@ -72,7 +72,7 @@ class Transaction extends Model
         'created_at'
     ];
 
-     protected $searchable = [
+    protected $searchable = [
         'columns' => [
             'transactions.uuid' => 10,
             'users.email' => 10,
@@ -108,6 +108,46 @@ class Transaction extends Model
     public function getAmountIntAttribute(): int
     {
         return (int) $this->amount;
+    }
+
+    public function getDescriptionFormattedAttribute() :string
+    {
+        if ($this->meta['source'] == 'cancel')
+            return __("Cancel of order #:order_hash :balance_type",
+                ['order_hash' => $this->meta['order_hash'], 'balance_type' => _l($this->meta['balance_type'])]);
+
+        elseif ($this->meta['source'] == 'payout')
+            return __("Payout of :start_date to :end_date",
+                ['start_date' => $this->meta['start_date'], 'end_date' => $this->meta['end_date']]);
+
+        elseif ($this->meta['source'] == 'transfer')
+            return __("Transfer to main balance order #:order_hash",
+                ['order_hash' => $this->meta['order_hash']]);
+
+        elseif ($this->meta['source'] == 'penalty')
+            return __("Penalty for cancel of order #:order_hash",
+                ['order_hash' => $this->meta['order_hash']]);
+
+        elseif ($this->meta['source'] == 'purchase'){
+            if ($this->meta['balance_type'] == 'bank')
+                return __("Bank transfer for order #:order_hash",
+                    ['order_hash' => $this->meta['order_hash']]);
+
+            return __("Pay with :balance_type for order #:order_hash",
+                ['order_hash' => $this->meta['order_hash'], 'balance_type' => _l($this->meta['balance_type'])]);
+        }
+
+        elseif ($this->meta['source'] == 'order')
+            return __("Pending payment for order #:order_hash",
+                ['order_hash' => $this->meta['order_hash']]);
+
+        elseif ($this->meta['source'] == 'granted')
+            if ($this->type == 'deposit')
+                return __('Deposit balance :balance_type',
+                    ['balance_type' => _l($this->meta['balance_type'])]);
+            else
+                return __('Withdrawn balance :balance_type',
+                    ['balance_type' => _l($this->meta['balance_type'])]);
     }
 
     public function getAmountFloatAttribute(): string
